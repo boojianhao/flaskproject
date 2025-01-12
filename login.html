@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block body %}
-
 <style>
 body {
     font-family: 'Montserrat', sans-serif;
@@ -132,7 +131,6 @@ span {
     font-size: 12px;
 }
 </style>
-
 <div class="signin-wrapper">
     <div class="sign-panels">
         <div class="login">
@@ -168,8 +166,8 @@ span {
                 <button type="submit" class="btn-signin">Sign In</button>
                 <a href="/signup" class="btn-member">Not a member yet? Sign Up now!</a>
             </form>
+            <a href="{{ url_for('security_questions') }}" class="btn-member">Forgot Password? Answer Security Questions</a>
         </div>
     </div>
 </div>
-
 {% endblock body %}

@@ -85,9 +85,8 @@ form label {
     color: #333;
 }
 
-form input[type="text"],
-form input[type="password"],
-form input[type="email"] {
+form input[type="email"],
+form input[type="password"] {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
@@ -183,6 +182,27 @@ span {
                         <span>{{ error }}</span>
                     {% endfor %}
                 {% endif %}
+
+                <div>
+                    <label for="security_question_1">What is your favorite activity?</label>
+                    {{ form.security_question_1 }}
+                </div>
+                {% if form.security_question_1.errors %}
+                    {% for error in form.security_question_1.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+
+                <div>
+                    <label for="security_question_2">What is your favorite color?</label>
+                    {{ form.security_question_2 }}
+                </div>
+                {% if form.security_question_2.errors %}
+                    {% for error in form.security_question_2.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+
                 <button type="submit" class="btn-signin">Sign Up</button>
                 <a href="/login" class="btn-member">Already have an account? Sign In</a>
             </form>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="signin-wrapper">
+    <div class="sign-panels">
+        <div class="forget-password">
+            <div class="signin-title">
+                <span>Forgot Password</span>
+                <p>Enter your email to answer security questions</p>
+            </div>
+
+            <form method="POST" action="/verify_security_questions">
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <button type="submit" class="btn-signin">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
