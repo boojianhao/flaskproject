@@ -1,12 +1,13 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login Successful</title>
-</head>
-<body>
-    <h1>Login Successful</h1>
+{% extends "base.html" %}
+{% block body %}
+<div>
+    <title>Profile</title>
+    <h1>Profile</h1>
+    <p>Name: {{ user.get_name() }}</p>
+    <p>Email: {{ user.get_email() }}</p>
+    <form action="{{ url_for('deactivate') }}" method="post">
+        <button type="submit">Deactivate Account</button>
+    </form>
     <a href="/logout"><button>Logout</button></a>
-</body>
-</html>
+</div>
+{% endblock %}

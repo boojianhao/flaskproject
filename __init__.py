@@ -1,11 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from forms import SignUp, Login
-from Users import Users
+from forms import *
+from Users import *
 import shelve
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"
+app.secret_key = "email"
 
+@app.route('/')
+def home():
+    return render_template("home.html")
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -20,7 +23,6 @@ def signup():
                 db["Users"] = user_dict
         except:
             print("Error in opening users.db.")
-
         new_user = Users(
             name=form.name.data,
             email=form.email.data.lower(),
@@ -28,7 +30,7 @@ def signup():
             security_question_1=form.security_question_1.data,
             security_question_2=form.security_question_2.data
         )
-        user_dict[new_user.get_email()] = new_user
+        user_dict[f"{new_user.get_email()}"] = new_user
         db["Users"] = user_dict
         db.close()
 
@@ -52,8 +54,13 @@ def login():
         except:
             print("Error in opening users.db.")
         db.close()
+
         if form.email.data in user_dict:
-            if form.password.data == user_dict[form.email.data].get_password():
+            user = user_dict[form.email.data]
+            if not user.is_active():
+                flash('This account has been deactivated.', 'danger')
+                return redirect(url_for('login'))
+            if form.password.data == user.get_password():
                 session["user"] = form.email.data
                 return redirect(url_for('profile'))
             else:
@@ -63,23 +70,41 @@ def login():
 
     return render_template('login.html', form=form)
 
+@app.route('/logout')
+def logout():
+    session.pop("user", None)
+    return redirect(url_for('home'))
 
-@app.route('/security_questions', methods=['GET', 'POST'])
-def security_questions():
-    return render_template('security_questions.html')
-
+@app.route('/profile')
+def profile():
+    user_dict = {}
+    db = shelve.open('users.db', 'c')
+    try:
+        if "Users" in db:  # is key exist?
+            user_dict = db["Users"]  # retrieve data
+        else:
+            db["Users"] = user_dict  # start with empty
+    except:
+        print("Error in opening users.db.")
+    db.close()
+    if "user" in session:
+        user_email = session["user"]
+        user = user_dict[user_email]
+        return render_template('profile.html', user=user)
+    return render_template('failure.html')
 
 @app.route('/verify_security_questions', methods=['POST'])
 def verify_security_questions():
     email = request.form['email']
     user_dict = {}
-    db = shelve.open('users.db', 'c')
     try:
+        db = shelve.open('users.db', 'c')
         if "Users" in db:
             user_dict = db["Users"]
-    except:
-        print("Error in opening users.db.")
-    db.close()
+        db.close()
+    except Exception as e:
+        flash('Error accessing the database. Please try again later.', 'danger')
+        return redirect(url_for('security_questions'))
 
     if email in user_dict:
         user = user_dict[email]
@@ -97,13 +122,14 @@ def check_security_answers():
     email = session.get('email')
 
     user_dict = {}
-    db = shelve.open('users.db', 'c')
     try:
+        db = shelve.open('users.db', 'c')
         if "Users" in db:
             user_dict = db["Users"]
-    except:
-        print("Error in opening users.db.")
-    db.close()
+        db.close()
+    except Exception as e:
+        flash('Error accessing the database. Please try again later.', 'danger')
+        return redirect(url_for('security_questions'))
 
     if email in user_dict:
         user = user_dict[email]
@@ -149,31 +175,39 @@ def change_password():
 
     return render_template('change_password.html')
 
+@app.route('/security_questions', methods=['GET', 'POST'])
+def security_questions():
+    return render_template('security_questions.html')
 
-@app.route('/logout')
-def logout():
-    session.pop("user", None)
-    return redirect(url_for('home'))
-
-
-@app.route('/profile')
-def profile():
-    user_dict = {}
-    db = shelve.open('users.db', 'c')
-    try:
-        if "Users" in db:
-            user_dict = db["Users"]
-        else:
-            db["Users"] = user_dict
-    except:
-        print("Error in opening users.db.")
-    db.close()
+@app.route('/deactivate', methods=['POST'])
+def deactivate():
     if "user" in session:
         user_email = session["user"]
-        user = user_dict[user_email]
-        return render_template('profile.html', user=user)
-    return render_template('failure.html')
+        user_dict = {}
+        db = shelve.open('users.db', 'c')
+        try:
+            if "Users" in db:
+                user_dict = db["Users"]
+            else:
+                db["Users"] = user_dict
+        except:
+            print("Error in opening users.db.")
 
+        if user_email in user_dict:
+            user = user_dict[user_email]
+            user.deactive()
+            db["Users"] = user_dict
+            db.close()
+            session.pop("user", None)
+            flash('Account deactivated successfully!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('User not found.', 'danger')
+            db.close()
+    else:
+        flash('No user is logged in.', 'danger')
+
+    return redirect(url_for('profile'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

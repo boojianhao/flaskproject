@@ -45,7 +45,7 @@ form label {
     color: #333;
 }
 
-form input[type="password"] {
+form input[type="text"] {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
@@ -73,22 +73,22 @@ form input[type="password"] {
 
 <div class="signin-wrapper">
     <div class="sign-panels">
-        <div class="change-password">
+        <div class="verify-security">
             <div class="signin-title">
-                <span>Change Password</span>
-                <p>Enter your new password</p>
+                <span>Security Questions</span>
+                <p>Answer the following questions</p>
             </div>
 
-            <form method="POST" action="/change_password">
+            <form method="POST" action="/check_security_answers">
                 <div>
-                    <label for="new_password">New Password</label>
-                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                    <label for="security_question_1">What is your favorite activity?</label>
+                    <input type="text" class="form-control" id="security_question_1" name="security_question_1" required>
                 </div>
                 <div>
-                    <label for="confirm_password">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    <label for="security_question_2">What is your favorite color?</label>
+                    <input type="text" class="form-control" id="security_question_2" name="security_question_2" required>
                 </div>
-                <button type="submit" class="btn-signin">Change Password</button>
+                <button type="submit" class="btn-signin">Submit</button>
             </form>
         </div>
     </div>
