@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    {% include '/admin_navbar.html' %}
+    <h1>Admin Dashboard</h1>
+    <a href="{{ url_for('create_driver') }}">Create Driver</a>
+    <ul>
+        {% for email, user in users.items() %}
+            <li>
+                {{ user.get_name() }} ({{ user.get_email() }})
+                <a href="{{ url_for('edit_user', email=user.get_email()) }}">Edit</a>
+                <form action="{{ url_for('delete_user', email=user.get_email()) }}" method="post" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
