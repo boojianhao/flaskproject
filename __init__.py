@@ -2,19 +2,39 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from forms import *
 from Users import *
 from admin import Admin
+from driver import Driver
 import shelve
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
-# Create an Admin instance
+# Create an Admin instance with specific credentials
+admin_email = "admin@admin.com"
+admin_password = "adminpassword"
 admin_user = Admin(
-    email="admin@admin.com",
-    password="adminpassword",
+    email=admin_email,
+    password=admin_password,
     name="Admin",
     security_question_1="What is your admin code?",
     security_question_2="What is your favorite admin tool?"
 )
+
+
+# Check if the admin account exists in the database and save it if it does not exist
+def ensure_admin_account():
+    db = shelve.open('users.db', 'c')
+    user_dict = db.get("Users", {})
+
+    if admin_email not in user_dict:
+        user_dict[admin_email] = admin_user
+        db["Users"] = user_dict
+        print("Admin account created and saved to the database.")
+    db.close()
+
+
+# Ensure the admin account is created when the application starts
+ensure_admin_account()
+
 
 @app.route('/')
 def home():
@@ -74,7 +94,7 @@ def login():
             if form.password.data == user.get_password():
                 session["user"] = form.email.data
                 # Check if the logged-in user is the admin
-                if form.email.data == admin_user.get_email():
+                if form.email.data == admin_email:
                     session["role"] = 'admin'
                     return redirect(url_for('admin_dashboard'))
                 else:
