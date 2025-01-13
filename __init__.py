@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from forms import *
-from Users import *
+from forms import SignUp, Login
+from Users import Users
 from admin import Admin
 from driver import Driver
 import shelve
@@ -93,10 +93,12 @@ def login():
                 return redirect(url_for('login'))
             if form.password.data == user.get_password():
                 session["user"] = form.email.data
-                # Check if the logged-in user is the admin
                 if form.email.data == admin_email:
                     session["role"] = 'admin'
                     return redirect(url_for('admin_dashboard'))
+                elif isinstance(user, Driver):
+                    session["role"] = 'driver'
+                    return redirect(url_for('driver_dashboard'))
                 else:
                     session["role"] = 'user'
                     return redirect(url_for('profile'))
@@ -143,18 +145,52 @@ def create_driver():
                 db["Users"] = user_dict
         except:
             print("Error in opening users.db.")
-        admin_user.create_driver(
-            user_dict=user_dict,
+        new_driver = Driver(
             email=form.email.data.lower(),
             password=form.password.data,
             name=form.name.data,
             security_question_1=form.security_question_1.data,
             security_question_2=form.security_question_2.data
         )
+        user_dict[f"{new_driver.get_email()}"] = new_driver
         db["Users"] = user_dict
         db.close()
 
         flash('Driver account created successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template("signup.html", form=form)
+
+
+@app.route('/create_admin', methods=['GET', 'POST'])
+def create_admin():
+    if session.get("role") != 'admin':
+        flash('You do not have access to this page.', 'danger')
+        return redirect(url_for('home'))
+
+    form = SignUp(request.form)
+    if request.method == 'POST' and form.validate():
+        user_dict = {}
+        db = shelve.open('users.db', 'c')
+        try:
+            if "Users" in db:
+                user_dict = db["Users"]
+            else:
+                db["Users"] = user_dict
+        except:
+            print("Error in opening users.db.")
+        new_admin = Admin(
+            email=form.email.data.lower(),
+            password=form.password.data,
+            name=form.name.data,
+            security_question_1=form.security_question_1.data,
+            security_question_2=form.security_question_2.data
+        )
+        user_dict[f"{new_admin.get_email()}"] = new_admin
+        db["Users"] = user_dict
+        db.close()
+
+        flash('Admin account created successfully!', 'success')
         return redirect(url_for('admin_dashboard'))
 
     return render_template("signup.html", form=form)
@@ -217,7 +253,7 @@ def delete_user(email):
         return redirect(url_for('admin_dashboard'))
 
     if email in user_dict:
-        admin_user.delete_user(user_dict, email)
+        del user_dict[email]
         db["Users"] = user_dict
         db.close()
         flash('User deleted successfully!', 'success')
@@ -249,6 +285,8 @@ def profile():
     if "user" in session:
         user_email = session["user"]
         user = user_dict[user_email]
+        if session["role"] == 'driver':
+            return render_template('driver_profile.html', user=user)
         return render_template('profile.html', user=user)
     return render_template('failure.html')
 
