@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Signup</title>
+</head>
+<body>
+    {% include 'includes/admin_navbar.html' %}
+    <h1>Admin Signup</h1>
+    <form method="POST" action="{{ url_for('create_admin') }}">
+        {{ form.csrf_token }}
+        <div>
+            <label for="name">Name</label>
+            {{ form.name }}
+        </div>
+        {% if form.name.errors %}
+            {% for error in form.name.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+        <div>
+            <label for="email">Email</label>
+            {{ form.email }}
+        </div>
+        {% if form.email.errors %}
+            {% for error in form.email.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+        <div>
+            <label for="password">Password</label>
+            {{ form.password }}
+        </div>
+        {% if form.password.errors %}
+            {% for error in form.password.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+        <div>
+            <label for="security_question_1">Security Question 1</label>
+            {{ form.security_question_1 }}
+        </div>
+        {% if form.security_question_1.errors %}
+            {% for error in form.security_question_1.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+        <div>
+            <label for="security_question_2">Security Question 2</label>
+            {{ form.security_question_2 }}
+        </div>
+        {% if form.security_question_2.errors %}
+            {% for error in form.security_question_2.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+        <button type="submit">Signup</button>
+    </form>
+</body>
+</html>
