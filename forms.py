@@ -15,3 +15,4 @@ class SignUp(Form):
     security_question_1 = StringField('What is your favorite activity?', validators=[DataRequired()])
     security_question_2 = StringField('What is your favorite color?', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
+

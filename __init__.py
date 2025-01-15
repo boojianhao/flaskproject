@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from forms import SignUp, Login
-from Users import Users
+from customer import Users
 from admin import Admin
 from driver import Driver
 import shelve
@@ -8,19 +8,16 @@ import shelve
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
-# Create an Admin instance with specific credentials
 admin_email = "admin@admin.com"
 admin_password = "adminpassword"
 admin_user = Admin(
     email=admin_email,
     password=admin_password,
     name="Admin",
-    security_question_1="What is your admin code?",
-    security_question_2="What is your favorite admin tool?"
+    security_question_1="badminton",
+    security_question_2="brown"
 )
 
-
-# Check if the admin account exists in the database and save it if it does not exist
 def ensure_admin_account():
     db = shelve.open('users.db', 'c')
     user_dict = db.get("Users", {})
@@ -93,10 +90,10 @@ def login():
                 return redirect(url_for('login'))
             if form.password.data == user.get_password():
                 session["user"] = form.email.data
-                if form.email.data == admin_email:
+                if user.is_admin():
                     session["role"] = 'admin'
                     return redirect(url_for('admin_dashboard'))
-                elif isinstance(user, Driver):
+                elif user.is_driver():
                     session["role"] = 'driver'
                     return redirect(url_for('driver_dashboard'))
                 else:
@@ -108,6 +105,26 @@ def login():
             flash("There is no such email registered with us.")
 
     return render_template('login.html', form=form)
+
+@app.route('/driver', methods=['GET'])
+def driver_dashboard():
+    if session.get("role") != 'driver':
+        flash('You do not have access to this page.', 'danger')
+        return redirect(url_for('home'))
+
+    user_dict = {}
+    db = shelve.open('users.db', 'c')
+    try:
+        if "Users" in db:
+            user_dict = db["Users"]
+    except:
+        print("Error in opening users.db.")
+    db.close()
+
+    user_email = session.get("user")
+    user = user_dict.get(user_email)
+
+    return render_template('driver_dashboard.html', user=user)
 
 
 @app.route('/admin', methods=['GET', 'POST'])
@@ -159,7 +176,7 @@ def create_driver():
         flash('Driver account created successfully!', 'success')
         return redirect(url_for('admin_dashboard'))
 
-    return render_template("signup.html", form=form)
+    return render_template("driver_signup.html", form=form)
 
 
 @app.route('/create_admin', methods=['GET', 'POST'])
@@ -193,7 +210,7 @@ def create_admin():
         flash('Admin account created successfully!', 'success')
         return redirect(url_for('admin_dashboard'))
 
-    return render_template("signup.html", form=form)
+    return render_template("admin_signup.html", form=form)
 
 
 @app.route('/edit_user/<email>', methods=['GET', 'POST'])
@@ -223,8 +240,6 @@ def edit_user(email):
         user._Users__name = request.form['name']
         user._Users__email = request.form['email']
         user._Users__password = request.form['password']
-        user._Users__security_question_1 = request.form['security_question_1']
-        user._Users__security_question_2 = request.form['security_question_2']
         db["Users"] = user_dict
         db.close()
         flash('User information updated successfully!', 'success')
@@ -395,7 +410,7 @@ def deactivate():
 
         if user_email in user_dict:
             user = user_dict[user_email]
-            user.deactive()
+            user.deactivate()
             db["Users"] = user_dict
             db.close()
             session.pop("user", None)
