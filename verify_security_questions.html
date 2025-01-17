@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block body %}
+
+<style>
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Form Styling */
+.signin-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.sign-panels {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+}
+
+.signin-title span {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.signin-title p {
+    font-size: 1rem;
+    color: #777;
+    margin-top: 5px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.btn-signin {
+    width: 100%;
+    padding: 10px;
+    background-color: crimson;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-signin:hover {
+    background-color: darkred;
+}
+</style>
+
+<div class="signin-wrapper">
+    <div class="sign-panels">
+        <div class="verify-security">
+            <div class="signin-title">
+                <span>Security Questions</span>
+                <p>Answer the following questions</p>
+            </div>
+
+            <form method="POST" action="/check_security_answers">
+                <div>
+                    <label for="security_question_1">What is your favorite activity?</label>
+                    <input type="text" class="form-control" id="security_question_1" name="security_question_1" required>
+                </div>
+                <div>
+                    <label for="security_question_2">What is your favorite color?</label>
+                    <input type="text" class="form-control" id="security_question_2" name="security_question_2" required>
+                </div>
+                <button type="submit" class="btn-signin">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

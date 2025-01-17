@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block body %}
+
+<style>
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Form Styling */
+.signin-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.sign-panels {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+}
+
+.signin-title span {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.signin-title p {
+    font-size: 1rem;
+    color: #777;
+    margin-top: 5px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+form input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.btn-signin {
+    width: 100%;
+    padding: 10px;
+    background-color: crimson;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-signin:hover {
+    background-color: darkred;
+}
+</style>
+
+<div class="signin-wrapper">
+    <div class="sign-panels">
+        <div class="forget-password">
+            <div class="signin-title">
+                <span>Forgot Password</span>
+                <p>Enter your email to answer security questions</p>
+            </div>
+
+            <form method="POST" action="/verify_security_questions">
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <button type="submit" class="btn-signin">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

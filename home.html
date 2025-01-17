@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body %}
+<br>
+<br>
+
+<section id="hero" class="d-flex justify-content-center align-items-center text-center vh-100">
+    <img src="{{ url_for('static', filename='images/background_image.jpg') }}" alt="Background Image" class="position-absolute w-100 h-100" style="object-fit: cover; opacity: 0.6; z-index: -1;">
+    <div class="container">
+        <div>
+            <h1 class="text-white display-4 mb-4">Hello, <span></span></h1>
+            <h1 class="text-white display-4 mb-4">Ready To <span></span></h1>
+            <h1 class="text-white display-4 mb-4">Go Green? <span></span></h1>
+            <a href="/login" class="btn btn-primary btn-lg rounded-pill mt-3">Log in</a>
+            <br>
+            <a href="/signup" class="btn btn-primary btn-lg rounded-pill mt-3">Create your Account</a>
+        </div>
+    </div>
+</section>
+<br>
+
+
+{% endblock %}
