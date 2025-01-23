@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from forms import SignUp, Login
+from forms import SignUp, Login, Availability
 from customer import Users
 from admin import Admin
 from driver import Driver
@@ -100,7 +100,7 @@ def login():
 
     return render_template('login.html', form=form)
 
-@app.route('/driver', methods=['GET'])
+@app.route('/driver/driver_dashboard', methods=['GET'])
 def driver_dashboard():
     if session.get("role") != 'driver':
         flash('You do not have access to this page.', 'danger')
@@ -118,7 +118,12 @@ def driver_dashboard():
     user_email = session.get("user")
     user = user_dict.get(user_email)
 
-    return render_template('driver_dashboard.html', user=user)
+    availability_db = shelve.open('availability.db', 'c')
+    availability_dict = availability_db.get('Availability', {})
+    user_availability = availability_dict.get(user_email, {})
+    availability_db.close()
+
+    return render_template('driver/driver_dashboard.html', user=user, user_availability=user_availability)
 
 
 @app.route('/admin', methods=['GET', 'POST'])
@@ -136,7 +141,7 @@ def admin_dashboard():
         print("Error in opening customers.db.")
     db.close()
 
-    return render_template('admin_dashboard.html', users=user_dict)
+    return render_template('admin/admin_dashboard.html', users=user_dict)
 
 
 @app.route('/create_driver', methods=['GET', 'POST'])
@@ -170,7 +175,7 @@ def create_driver():
         flash('Driver account created successfully!', 'success')
         return redirect(url_for('admin_dashboard'))
 
-    return render_template("driver_signup.html", form=form)
+    return render_template("admin/driver_signup.html", form=form)
 
 
 @app.route('/create_admin', methods=['GET', 'POST'])
@@ -204,7 +209,7 @@ def create_admin():
         flash('Admin account created successfully!', 'success')
         return redirect(url_for('admin_dashboard'))
 
-    return render_template("admin_signup.html", form=form)
+    return render_template("admin/admin_signup.html", form=form)
 
 
 @app.route('/edit_user/<email>', methods=['GET', 'POST'])
@@ -240,7 +245,7 @@ def edit_user(email):
         return redirect(url_for('admin_dashboard'))
 
     db.close()
-    return render_template('edit_user.html', user=user)
+    return render_template('admin/edit_user.html', user=user)
 
 
 @app.route('/delete_user/<email>', methods=['POST'])
@@ -287,10 +292,9 @@ def profile():
         user_email = session["user"]
         user = user_dict[user_email]
         if session["role"] == 'driver':
-            return render_template('driver_profile.html', user=user)
-        return render_template('profile.html', user=user)
-    return render_template('failure.html')
-
+            return render_template('driver/driver_profile.html', user=user)
+        return render_template('customer/profile.html', user=user)
+    #return failure html
 
 @app.route('/logout')
 def logout():
@@ -420,21 +424,52 @@ def manage_users():
     db = shelve.open('customers.db', 'r')
     user_dict = db.get('Users', {})
     db.close()
-    return render_template('manage_users.html', users=user_dict)
+    return render_template('admin/manage_users.html', users=user_dict)
 
 @app.route('/manage_admins')
 def manage_admins():
     db = shelve.open('customers.db', 'r')
     user_dict = db.get('Users', {})
     db.close()
-    return render_template('manage_admins.html', users=user_dict)
+    return render_template('admin/manage_admins.html', users=user_dict)
 
 @app.route('/manage_drivers')
 def manage_drivers():
     db = shelve.open('customers.db', 'r')
     user_dict = db.get('Users', {})
     db.close()
-    return render_template('manage_drivers.html', users=user_dict)
+    return render_template('admin/manage_drivers.html', users=user_dict)
+
+
+@app.route('/driver/availability', methods=['GET', 'POST'])
+def submit_availibility():
+    if 'user' not in session or session.get("role") != 'driver':
+        flash('You do not have access to this page.', 'danger')
+        return redirect(url_for('login'))
+
+    form = Availability(request.form)
+    if request.method == 'POST' and form.validate():
+        user_email = session['user']
+        db = shelve.open('availability.db', 'c')
+        availability_dict = db.get('Availability', {})
+
+        availability_dict[user_email] = {
+            'monday': form.monday.data,
+            'tuesday': form.tuesday.data,
+            'wednesday': form.wednesday.data,
+            'thursday': form.thursday.data,
+            'friday': form.friday.data,
+            'saturday': form.saturday.data,
+            'sunday': form.sunday.data
+        }
+
+        db['Availability'] = availability_dict
+        db.close()
+
+        flash('Availability updated successfully!', 'success')
+        return redirect(url_for('driver_dashboard'))
+
+    return render_template('driver/availability.html', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
